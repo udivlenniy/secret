@@ -16,6 +16,8 @@ return array(
     'sourceLanguage' => 'en_US',
     'language' => 'ru',
 
+    'defaultController'=>'site/login',
+
 	// autoloading model and component classes
 	'import'=>array(
 		'application.models.*',
@@ -51,6 +53,7 @@ return array(
 			'allowAutoLogin'=>true,
             // это значение устанавливается по умолчанию
             'loginUrl'=>array('site/login'),
+            'returnUrl'=>array('partner/business/personal'),
 		),
 		// uncomment the following to enable URLs in path-format
 		'urlManager'=>array(

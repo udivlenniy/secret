@@ -39,6 +39,7 @@ class UserIdentity extends CUserIdentity
             $this->_status = $model->status;
 
             $this->setState('status', $model->status);
+            $this->setState('role', $model->role);
             $this->setState('id', $model->id);
         }
 

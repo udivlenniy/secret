@@ -11,12 +11,20 @@ class PartnerProgrammBehavior extends CActiveRecordBehavior {
 
     public $partnerModel = 'Partner';
 
-    /*public function afterSave($event){
-        if ($file = CUploadedFile::getInstance($this->owner, $this->fileField))){
-            $this->deleteFile();
-            $file->saveAs($this->filePath . '/' . $file->name);
-            $this->owner->{$this->fileField} = $file->name;
-        }
-    }*/
+    public $_partner_model;
 
+    /*
+     * основной метод покупки партнёрского комплекта - статуса
+     * ВАлидация на наличие средств, уже была проведена, записываем все события и производим списывание с баланса купившего и фиксируем факт покупки
+     * $who_buy - кто покупает комплект
+     * $for_whom - для кого покупается комплект
+     */
+    public function buyPartnerStatus($who_buy, $for_whom){
+
+    }
+
+    /*
+     * шаг-1
+     * обновим
+     */
 }

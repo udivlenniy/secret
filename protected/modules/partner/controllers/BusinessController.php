@@ -34,6 +34,10 @@ class BusinessController extends BaseUserController{
                 'modelName'=>'Partner',
                 'view'=>'progress',
             ),
+            'buyPartner'=>array(
+                'class'=>'ext.actions.BuyPartnerAction',
+                'modelName'=>'Partner',
+            ),
             // подробная информация о выбранном типе рефералов, указанного уровня или статуса
             /*'ajax_progress'=>array(
                 'class'=>'ext.actions.AjaxProgressAction',

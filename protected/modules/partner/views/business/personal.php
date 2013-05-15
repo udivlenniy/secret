@@ -28,6 +28,9 @@
 $this->widget('zii.widgets.CListView', array(
     'dataProvider'=>$dataProviderPartnerComplekts,
     'itemView'=>'_partner_complect',   // refers to the partial view named '_post'
+    'viewData'=>array(
+        'status'=>$model->status
+    ),
     'template'=>'{items}',
     'emptyText'=>'',
     /*'sortableAttributes'=>array(

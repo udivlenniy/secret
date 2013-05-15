@@ -14,9 +14,8 @@
     <div class="partner-complekt-price">
         <?=$data->getAttributeLabel('price').' : '.$data->price?>  руб.
         <?
-            $model = Partner::model()->findByPk(Yii::app()->user->id);
             // если пользователь партнёр, то не вывод сумму с рег. взносом
-            if($model->status==Partner::STATUS_MEMBER){
+            if($status==Partner::STATUS_MEMBER){
                 echo '+ 400 руб. - регистрационный взнос';
             }
         ?>

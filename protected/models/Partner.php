@@ -103,6 +103,9 @@ class Partner extends CActiveRecord
                 'levelAttribute'=>'level',
                 'hasManyRoots'=>false,
             ),
+            'PartnerProgrammBehavior'=>array(
+                'class'=>'application.behaviors.PartnerProgrammBehavior'
+            )
 //            'TreeBehavior' => array(
 //              'class' => 'application.behaviors.XTreeBehavior',
 //                'treeLabelMethod'=> 'getTreeLabel',

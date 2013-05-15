@@ -28,6 +28,20 @@ class BuyPartnerAction extends CAction {
         //формируем массив с данными для отображения в форме для юзера
         $partner = $this->getModel()->findByPk(Yii::app()->user->id);
 
+        // формируем цену партнёрского кмоплекта
+        if($partner->status==Partner::STATUS_MEMBER){
+            $price = 4000;//3600 - цена комплекта+ 400 рег. взнос
+        }else{
+            $price = 3600;
+        }
+
+        //проверяем достаточно ли средств для покупки
+        if($partner->balance>=$price){
+            // денег хватает - совершаем покупку комплекта
+        }else{
+            // не достаточно средств
+            echo 'Ошибка! На вашем счете не хватает '.($price-$partner->balance).' баллов для покупки комплекта';
+        }
     }
     /**
      * @return CActiveRecord
@@ -35,5 +49,25 @@ class BuyPartnerAction extends CAction {
     protected function getModel()
     {
         return CActiveRecord::model($this->modelName);
+    }
+
+    /*
+     * покупка партнёрского аккаунта
+     */
+    public function buy($partner){
+
+        //обрачиваем все операции в транзакцию
+        $transaction = Yii::app()->db->beginTransaction();
+
+        try {
+
+            $transaction->commit();
+
+        }catch (Exception $e){
+
+            $transaction->rollback();
+
+            throw $e;
+        }
     }
 }

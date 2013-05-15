@@ -35,7 +35,7 @@ class ProgressAction extends CAction {
 
         //$criteria=new CDbCriteria;
 
-        $dataProvider = new CActiveDataProvider('Partner', array(
+        $dataProvider = new CActiveDataProvider($data, array(
             'criteria'=>new CDbCriteria,
             'pagination'=>array(
                 'pageSize'=>1,
