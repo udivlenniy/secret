@@ -18,10 +18,10 @@ class Partner extends CActiveRecord
     const ROLE_USER = 0;//роль - админ системы
 
     //уровни в партнёрской программе
-    const SILVER_LEVEL = 'Серебряный';
-    const GOLD_LEVEL = 'Золотой';
-    const PLATINUM_LEVEL = 'Платиновый';
-    const DIAMONT_LEVEL = 'Бриллиантовый';
+    const SILVER_LEVEL = 2;
+    const GOLD_LEVEL = 3;
+    const PLATINUM_LEVEL = 4;
+    const DIAMONT_LEVEL = 5;
 
     //статус партнёра
     const STATUS_MEMBER = 1;//участник
@@ -174,8 +174,9 @@ class Partner extends CActiveRecord
 		// class name for the relations automatically generated below.
         return array(
 
-            'parent' => array(self::BELONGS_TO, 'Partner', 'root'),
+            //'parent' => array(self::BELONGS_TO, 'Partner', 'root'),
 
+            // кол-во НЕ_именных партнёрских комплектов
             'partnershipCount' => array(self::STAT, 'BuyingPartnershipSet', 'who_buys',
                 'condition'=>'type_buying='.BuyingPartnershipSet::TYPE_NONAME
             ),
@@ -285,41 +286,26 @@ class Partner extends CActiveRecord
         }
 
         //2 - серебряный
-        if($this->partner_level==2){
-            return self::SILVER_LEVEL;
-        }
-        //3 - золотой
-        if($this->partner_level==3){
-            return self::GOLD_LEVEL;
-        }
-        //4 - бриллиантовый
-        if($this->partner_level==4){
-            return self::DIAMONT_LEVEL;
+        if($this->partner_level==self::SILVER_LEVEL){
+            return 'Серебряный';
         }
 
+        //3 - золотой
+        if($this->partner_level==self::GOLD_LEVEL){
+            return 'Золотой';
+        }
+
+        //4 - платиновый
+        if($this->partner_level==self::PLATINUM_LEVEL){
+            return 'Платиновый';
+        }
+
+        //5- бриллиантовый
+        if($this->partner_level==self::DIAMONT_LEVEL){
+            return 'Бриллиантовый';
+        }
         return $this->partner_level;
     }
-
-    /**
-     * Retrieves a list of child models
-     * @param integer the id of the parent model
-     * @return CActiveDataProvider the data provider
-     */
-    /*public function getDataProvider($id=null)
-    {
-        if($id===null)
-            $id=$this->TreeBehavior->getRootId();
-        $criteria=new CDbCriteria(array(
-            'condition'=>'parent_id=:id',
-            'params'=>array(':id'=>$id),
-            'order'=>'label',
-            //'with'=>'childCount',
-        ));
-        return new CActiveDataProvider(get_class($this), array(
-            'criteria'=>$criteria,
-            'pagination'=>false,
-        ));
-    }*/
 
     /**
      * Suggests a list of existing values matching the specified keyword.

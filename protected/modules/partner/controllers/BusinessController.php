@@ -66,13 +66,13 @@ class BusinessController extends BaseUserController{
             //throw new CHttpException(400,'Invalid request');
         }
 
-        //формируем массив с данными для отображения в форме для юзера
-        //$data = $this->loadPartner();
-
         $dataProviderPartnershipSet = new CActiveDataProvider('PartnershipSet');
 
+        $model = $this->loadPartner();
+
         $this->render('personal',array(
-            'model'=>$this->loadPartner(),
+            'model'=>$model,
+            'parent'=>$model->parent()->find(),
             'dataProviderPartnerComplekts'=>$dataProviderPartnershipSet
         ));
     }

@@ -18,9 +18,17 @@
 <!--доступно только Участникам и Партнерам-->
 <!--<strong>Уровень в потребительской программе:</strong> --><?//=$status?><!-- <br>-->
 
+<?
+if($parent!==null){
+    echo '<strong>Id спонсора:</strong> '.$parent->id.'<br>';
+}
+?>
 
-<strong>Id спонсора:</strong> <?=$model->parent->id?> <br>
-<strong>ФИО спонсора:</strong> <?=$model->parent->fio?> <br><br><br>
+<?
+if($parent!==null){
+    echo '<strong>ФИО спонсора:</strong> '.$parent->fio.'<br><br><br>';
+}
+?>
 
 <?
 //_partner_complects

@@ -37,7 +37,10 @@ class BuyPartnerAction extends CAction {
 
         //проверяем достаточно ли средств для покупки
         if($partner->balance>=$price){
+
             // денег хватает - совершаем покупку комплекта
+            $this->buy($partner);
+
         }else{
             // не достаточно средств
             echo 'Ошибка! На вашем счете не хватает '.($price-$partner->balance).' баллов для покупки комплекта';
@@ -57,17 +60,29 @@ class BuyPartnerAction extends CAction {
     public function buy($partner){
 
         //обрачиваем все операции в транзакцию
-        $transaction = Yii::app()->db->beginTransaction();
+//        $transaction = Yii::app()->db->beginTransaction();
+//
+//        try {
 
-        try {
+            $buy = new BuyPartnerComplekt();
 
-            $transaction->commit();
+            $buy->who_buys = Yii::app()->user->id;
+            $buy->for_whom = Yii::app()->user->id;
+            $buy->_partnerWhoBuy = $partner;
+            $buy->run();
+            if($buy->error){
+                echo $buy->error_text;
+            }else{
+                echo 'ok';
+            }
 
-        }catch (Exception $e){
-
-            $transaction->rollback();
-
-            throw $e;
-        }
+//            $transaction->commit();
+//
+//        }catch (Exception $e){
+//
+//            $transaction->rollback();
+//
+//            throw $e;
+//        }
     }
 }

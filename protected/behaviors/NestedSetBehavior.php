@@ -27,10 +27,6 @@ class NestedSetBehavior extends CActiveRecordBehavior
 
     public $id='id';
     public $sort='id';
-    /**
-     * @var string the attribute name of tree node parent id
-     */
-    public $parent_id='root';
 
     /*
      * подсчитывает кол-во рефов в заданном интервале уровней по юзеру

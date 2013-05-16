@@ -16,6 +16,7 @@ require_once($yii);
 
 Yii::createWebApplication($config)->run();
 //$partner = new Partner();
-//echo 'pass='.$partner->encrypting('i@mail.ru');
+//echo 'pass='.$partner->encrypting('1');
 //Yii::app()->user->id = 2;
 //Yii::app()->user->logout();
+
