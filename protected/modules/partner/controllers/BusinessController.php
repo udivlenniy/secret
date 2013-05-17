@@ -70,6 +70,13 @@ class BusinessController extends BaseUserController{
 
         $model = $this->loadPartner();
 
+        /*
+        $buyPartnerShip = new BuyingPartnershipSet();
+        // для кого покупается комплект
+        $buyPartnerShip->partner_id = Yii::app()->user->id;
+        $buyPartnerShip->type_buying = BuyingPartnershipSet::TYPE_NONAME;
+        $buyPartnerShip->*/
+
         $this->render('personal',array(
             'model'=>$model,
             'parent'=>$model->parent()->find(),

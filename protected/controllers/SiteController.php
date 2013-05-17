@@ -120,8 +120,10 @@ class SiteController extends BaseController
 		{
 			$model->attributes=$_POST['LoginPartner'];
 			// validate user input and redirect to the previous page if valid
-			if($model->validate() && $model->login())
-				$this->redirect(Yii::app()->user->returnUrl);
+			if($model->validate() && $model->login()){
+                $this->redirect($this->createUrl('partner/business/personal'));
+            }
+
 		}
 		// display the login form
 		$this->render('login',array('model'=>$model));

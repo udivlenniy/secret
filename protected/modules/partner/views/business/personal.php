@@ -41,9 +41,5 @@ $this->widget('zii.widgets.CListView', array(
     ),
     'template'=>'{items}',
     'emptyText'=>'',
-    /*'sortableAttributes'=>array(
-        'title',
-        'create_time'=>'Post Time',
-    ),*/
 ));
 ?>

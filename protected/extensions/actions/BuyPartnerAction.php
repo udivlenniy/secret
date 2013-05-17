@@ -59,30 +59,18 @@ class BuyPartnerAction extends CAction {
      */
     public function buy($partner){
 
-        //обрачиваем все операции в транзакцию
-//        $transaction = Yii::app()->db->beginTransaction();
-//
-//        try {
+        $buy = new BuyPartnerComplekt();
 
-            $buy = new BuyPartnerComplekt();
+        $buy->who_buys = Yii::app()->user->id;
+        $buy->for_whom = Yii::app()->user->id;
+        $buy->_partnerWhoBuy = $partner;
+        $buy->_partner_ship_id = $_POST['id'];
+        $buy->run();
+        if($buy->error){
+            echo $buy->error_text;
+        }else{
+            echo 'ok';
 
-            $buy->who_buys = Yii::app()->user->id;
-            $buy->for_whom = Yii::app()->user->id;
-            $buy->_partnerWhoBuy = $partner;
-            $buy->run();
-            if($buy->error){
-                echo $buy->error_text;
-            }else{
-                echo 'ok';
-            }
-
-//            $transaction->commit();
-//
-//        }catch (Exception $e){
-//
-//            $transaction->rollback();
-//
-//            throw $e;
-//        }
+        }
     }
 }

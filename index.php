@@ -12,11 +12,21 @@ defined('YII_TRACE_LEVEL') or define('YII_TRACE_LEVEL',3);
 
 require_once($yii);
 
-
-
 Yii::createWebApplication($config)->run();
-//$partner = new Partner();
-//echo 'pass='.$partner->encrypting('1');
-//Yii::app()->user->id = 2;
-//Yii::app()->user->logout();
 
+
+$root = Partner::model()->findByPk(11);
+//$root->encrypting('1');
+/*
+for($i=2;$i<22;$i++){
+    $root = Partner::model()->findByPk($i)->deleteNode();
+}*/
+/*
+for($i=0;$i<4;$i++){
+    $partner = new Partner();
+    $partner->fio = 'Пупкин-'.$i;
+    $partner->email = 'pypkin'.$i.'@mail.ru';
+    $partner->balance = 4000;
+    $partner->password = $partner->encrypting('1');
+    $partner->prependTo($root);
+}*/

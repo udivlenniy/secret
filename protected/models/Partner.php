@@ -18,14 +18,14 @@ class Partner extends CActiveRecord
     const ROLE_USER = 0;//роль - админ системы
 
     //уровни в партнёрской программе
-    const SILVER_LEVEL = 2;
-    const GOLD_LEVEL = 3;
-    const PLATINUM_LEVEL = 4;
-    const DIAMONT_LEVEL = 5;
+    const SILVER_LEVEL = 1;
+    const GOLD_LEVEL = 2;
+    const PLATINUM_LEVEL = 3;
+    const DIAMONT_LEVEL = 4;
 
     //статус партнёра
-    const STATUS_MEMBER = 1;//участник
-    const STATUS_Partner = 2;//партнер
+    const STATUS_MEMBER = 0;//участник
+    const STATUS_Partner = 1;//партнер
 
     const SALT = '159753159753';
 
@@ -281,7 +281,7 @@ class Partner extends CActiveRecord
     public function getPartnerLevel(){
 
         //если статус - участник, то нет уровня
-        if($this->status==1 || $this->partner_level==1){
+        if($this->status==self::STATUS_MEMBER || $this->partner_level==0){
             return 'Нет уровня';
         }
 

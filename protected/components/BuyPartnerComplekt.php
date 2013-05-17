@@ -17,7 +17,7 @@ class BuyPartnerComplekt {
 
     public $_partnerWhoBuy;// модель партнёра, кто покупает партнёрский комплект
     public $_partnerForWhom;// модель партнёра, для кого покупается партнёрский комплект
-    public $_partnerComplektModel;// модель Партнёрского комплекта
+    public $_partner_ship_id;// ID партнёрского комплекта, который покупается
 
     public $who_buys;// кто покупает партнёрский комплект
     public $for_whom;// для кого была произвидена покупка партнёрского комплекта
@@ -134,7 +134,17 @@ class BuyPartnerComplekt {
         $attributes = array_merge(array('balance'=>$this->_partnerWhoBuy->balance-($this->price + $this->reg_payment)),$attributes);
 
         //$this->_partnerWhoBuy->_ignoreEvent = false;
-        $this->_partnerWhoBuy->updateByPk($this->_partnerWhoBuy->id, $attributes);
+        if(!empty($attributes)){
+            $this->_partnerWhoBuy->updateByPk($this->_partnerWhoBuy->id, $attributes);
+            /*
+            // закфиксируем процесс покупки комплекта
+            $buyPartnerShip = new BuyingPartnershipSet();
+            // для кого покупается комплект
+            $buyPartnerShip->partner_id = $this->_partnerForWhom->id;
+            // какой комплект он покупает
+            //$buyPartnerShip->partnership_set_id =
+            */
+        }
 
         // рекурсивный обход родителей текущего партнёра - купившего комплект
         $this->recursiveParents($this->_partnerWhoBuy);
@@ -193,11 +203,15 @@ class BuyPartnerComplekt {
 
                     //$parent->balance = $parent->balance + percentFromValue($this->price, $percent);
                     $attributes = array_merge(array('balance'=>$parent->balance + percentFromValue($this->price, $percent)),$attributes);
+
+                    $attributes = array_merge(array('bonus_from_other_levels'=>$percent),$attributes);
                 }
             }
 
             // записываем операцию
-            $parent->updateByPk($parent->id, $attributes);
+            if(!empty($attributes)){
+                $parent->updateByPk($parent->id, $attributes);
+            }
 
             // переназначение, для рекурсивного обхода
             $model = $parent;
@@ -236,7 +250,7 @@ class BuyPartnerComplekt {
     public function recalculatedPartnerLevel($count_active_points){
 
         if($count_active_points<2){
-            return 1;
+            return 0;
         }
 
         // 2 бала актив. - серебряный уровень партнёра

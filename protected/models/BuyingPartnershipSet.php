@@ -22,6 +22,8 @@ class BuyingPartnershipSet extends CActiveRecord
     const TYPE_NONAME = 0;//не именной партнёрский комплект
     const TYPE_NAME = 1;// именной тип партнёрского комплекта
 
+    public $positive_balance = false;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -48,14 +50,24 @@ class BuyingPartnershipSet extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('partner_id, create_at, partnership_set_id, type_buying, who_buys', 'required'),
+			array('partner_id, partnership_set_id, type_buying, who_buys', 'required'),
 			array('partnership_set_id, type_buying', 'numerical', 'integerOnly'=>true),
-			array('partner_id, create_at, who_buys', 'length', 'max'=>11),
+			array('partner_id, who_buys', 'length', 'max'=>11),
+            array('create_at', 'default', 'value'=>time()),
+            // проверяем, достаточно ли средств для покупки у текущего юзера партнёрского комплекта
+            array('positive_balance', 'isPositiveBalance'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id, partner_id, create_at, partnership_set_id, type_buying, who_buys', 'safe', 'on'=>'search'),
 		);
 	}
+
+    /*
+     * у покупающего юзера должно быть достаточно средств для покупки партнёрского комплекта
+     */
+    public function isPositiveBalance(){
+
+    }
 
 	/**
 	 * @return array relational rules.
@@ -108,4 +120,8 @@ class BuyingPartnershipSet extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
+
+    public function fixTransaction(){
+        $this->save();
+    }
 }
