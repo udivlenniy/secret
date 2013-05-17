@@ -15,7 +15,6 @@ require_once($yii);
 Yii::createWebApplication($config)->run();
 
 
-$root = Partner::model()->findByPk(11);
 //$root->encrypting('1');
 /*
 for($i=2;$i<22;$i++){

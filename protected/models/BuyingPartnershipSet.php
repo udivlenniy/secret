@@ -22,8 +22,6 @@ class BuyingPartnershipSet extends CActiveRecord
     const TYPE_NONAME = 0;//не именной партнёрский комплект
     const TYPE_NAME = 1;// именной тип партнёрского комплекта
 
-    public $positive_balance = false;
-
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @param string $className active record class name.
@@ -51,25 +49,20 @@ class BuyingPartnershipSet extends CActiveRecord
 		// will receive user inputs.
 		return array(
 			array('partner_id, partnership_set_id, type_buying, who_buys', 'required'),
-			array('partnership_set_id, type_buying', 'numerical', 'integerOnly'=>true),
+			array('partnership_set_id, type_buying, partner_id, who_buys', 'numerical', 'integerOnly'=>true),
 			array('partner_id, who_buys', 'length', 'max'=>11),
+            // покупка текущим времени фиксируем
             array('create_at', 'default', 'value'=>time()),
-            // проверяем, достаточно ли средств для покупки у текущего юзера партнёрского комплекта
-            array('positive_balance', 'isPositiveBalance'),
+            // покупает комплект всегда текущий юзер
+            array('who_buys', 'default', 'value'=>Yii::app()->user->id),
+            array('type_buying', 'in','range'=>range(self::TYPE_NONAME,self::TYPE_NAME)),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id, partner_id, create_at, partnership_set_id, type_buying, who_buys', 'safe', 'on'=>'search'),
 		);
 	}
 
-    /*
-     * у покупающего юзера должно быть достаточно средств для покупки партнёрского комплекта
-     */
-    public function isPositiveBalance(){
-
-    }
-
-	/**
+    /**
 	 * @return array relational rules.
 	 */
 	public function relations()
@@ -90,11 +83,11 @@ class BuyingPartnershipSet extends CActiveRecord
 	{
 		return array(
 			'id' => 'ID',
-			'partner_id' => 'Partner',
-			'create_at' => 'Create At',
-			'partnership_set_id' => 'Partnership Set',
-			'type_buying' => 'Type Buying',
-			'who_buys' => 'Who Buys',
+			'partner_id' => 'Для кого покупается партнёрский комплект',
+			'create_at' => 'Дата/время',
+			'partnership_set_id' => 'Партнерский комплект',
+			'type_buying' => 'Тип комплекта',
+			'who_buys' => 'Кто покупает',
 		);
 	}
 
@@ -120,8 +113,4 @@ class BuyingPartnershipSet extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
-
-    public function fixTransaction(){
-        $this->save();
-    }
 }

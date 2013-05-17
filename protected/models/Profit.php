@@ -1,28 +1,4 @@
 <?php
-
-/**
- * This is the model class for table "{{finance_partnership}}".
- *
- * The followings are the available columns in table '{{finance_partnership}}':
- * @property string $id
- * @property string $destination_account
- * @property string $point
- * @property string $sender_account
- * @property string $has_partners
- * @property string $has_personal_partners
- * @property string $active_points
- * @property integer $partner_level
- * @property string $active_points_sender
- * @property integer $partner_level_sender
- * @property string $level_cooperator
- * @property string $create_at
- * @property integer $bonus_from_level1
- * @property integer $bonus_from_other_levels
- *
- * The followings are the available model relations:
- * @property Partner $destinationAccount
- * @property Partner $senderAccount
- */
 class Profit extends CActiveRecord
 {
 
@@ -62,6 +38,7 @@ class Profit extends CActiveRecord
 			array('partner_level, partner_level_sender, bonus_from_level1, bonus_from_other_levels', 'numerical', 'integerOnly'=>true),
 			array('destination_account, point, sender_account, has_partners, has_personal_partners, active_points, active_points_sender, level_cooperator, create_at', 'length', 'max'=>10),
 			// The following rule is used by search().
+            array('create_at', 'default', 'value'=>time()),
 			// Please remove those attributes that should not be searched.
 			array('id, destination_account, point, sender_account, has_partners, has_personal_partners, active_points, partner_level, active_points_sender, partner_level_sender', 'safe', 'on'=>'search'),
             array('dateFrom, dateTo, level_cooperator, create_at, bonus_from_level1, bonus_from_other_levels', 'safe', 'on'=>'search'),

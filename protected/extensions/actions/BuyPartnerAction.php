@@ -70,7 +70,6 @@ class BuyPartnerAction extends CAction {
             echo $buy->error_text;
         }else{
             echo 'ok';
-
         }
     }
 }

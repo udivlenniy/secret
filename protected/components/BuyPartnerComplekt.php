@@ -32,6 +32,9 @@ class BuyPartnerComplekt {
 
     private $for_me = true;
 
+    // тип партнёр. комплекта
+    private $type_partnership;
+
     public function run(){
 
         if(empty($this->who_buys)){
@@ -107,13 +110,14 @@ class BuyPartnerComplekt {
      */
     public function buyForMe(){
 
-
+        // массив значений, которые нужно обновить у записи
         $attributes = array();
 
         // НЕ первый партнёрский комплект
         if($this->_partnerWhoBuy->status==Partner::STATUS_Partner){
 
-            //$query = $this->_connect->createCommand('UPDATE {{partner}} SET balance=balance-:balanceMinus, active_points=active_points+1 WHERE id=:id');
+            // если он уже ПАРТНЁР, значит покупает себе НЕ_именной комплект(не первый)
+            $this->type_partnership = BuyingPartnershipSet::TYPE_NONAME;
 
             // добавляем балы-активности за покупку НЕ_первого партнёрского комплета
             $this->_partnerWhoBuy->active_points = $this->_partnerWhoBuy->active_points+1;
@@ -121,29 +125,27 @@ class BuyPartnerComplekt {
             $attributes = array_merge(array('active_points'=>$this->_partnerWhoBuy->active_points+1),$attributes);
 
         }elseif($this->_partnerWhoBuy->status==Partner::STATUS_MEMBER){// ПЕРВЫЙ партнёрский комплект
+
+            // если он участник, значит покупает себе именной комплект(первый)
+            $this->type_partnership = BuyingPartnershipSet::TYPE_NAME;
+
             $this->reg_payment = 400;
-            //$query = $this->_connect->createCommand('UPDATE {{partner}} SET balance=balance-:balanceMinus, status=:status WHERE id=:id');
-            //$query->bindValue(':status', Partner::STATUS_Partner, PDO::PARAM_INT);
+
             $this->_partnerWhoBuy->status = Partner::STATUS_Partner;
 
             $attributes = array_merge(array('status'=>Partner::STATUS_Partner),$attributes);
         }
 
         //списали с баланса юзера сумму покупки
-        //$this->_partnerWhoBuy->balance = $this->_partnerWhoBuy->balance-($this->price + $this->reg_payment);
         $attributes = array_merge(array('balance'=>$this->_partnerWhoBuy->balance-($this->price + $this->reg_payment)),$attributes);
 
-        //$this->_partnerWhoBuy->_ignoreEvent = false;
+        // есть данные для обновления - ОБНОВИМ
         if(!empty($attributes)){
+
             $this->_partnerWhoBuy->updateByPk($this->_partnerWhoBuy->id, $attributes);
-            /*
-            // закфиксируем процесс покупки комплекта
-            $buyPartnerShip = new BuyingPartnershipSet();
-            // для кого покупается комплект
-            $buyPartnerShip->partner_id = $this->_partnerForWhom->id;
-            // какой комплект он покупает
-            //$buyPartnerShip->partnership_set_id =
-            */
+
+            //====закфиксируем процесс покупки комплекта===============================
+            $this->afterBuy();
         }
 
         // рекурсивный обход родителей текущего партнёра - купившего комплект
@@ -163,6 +165,8 @@ class BuyPartnerComplekt {
 
             $parent = $model->parent()->find();
 
+            $sum_profit = 0;
+
             // если кончились родители, остановились
             if($parent===null){ break;  }
 
@@ -176,9 +180,10 @@ class BuyPartnerComplekt {
                 // прибыль получает ТОЛЬКО партнёр, НЕ участник
                 if($parent->status==Partner::STATUS_Partner){
 
-                    $attributes = array_merge(array('balance'=>$parent->balance + percentFromValue($this->price, 20)),$attributes);
+                    // сумма дохода по партнёру - его ПРОФИТ
+                    $sum_profit = $parent->balance + percentFromValue($this->price, 20);
 
-                    //$parent->balance = $parent->balance + percentFromValue($this->price, 20);
+                    $attributes = array_merge(array('balance'=>$parent->balance + percentFromValue($this->price, 20)),$attributes);
                 }
             }
 
@@ -202,6 +207,10 @@ class BuyPartnerComplekt {
                     $percent = $this->recalculatedPercentPartnerLevel($parent->partner_level);
 
                     //$parent->balance = $parent->balance + percentFromValue($this->price, $percent);
+
+                    // сумма дохода по партнёру - его ПРОФИТ
+                    $sum_profit = $parent->balance + percentFromValue($this->price, $percent);
+
                     $attributes = array_merge(array('balance'=>$parent->balance + percentFromValue($this->price, $percent)),$attributes);
 
                     $attributes = array_merge(array('bonus_from_other_levels'=>$percent),$attributes);
@@ -210,10 +219,14 @@ class BuyPartnerComplekt {
 
             // записываем операцию
             if(!empty($attributes)){
+
                 $parent->updateByPk($parent->id, $attributes);
+
+                //фиксируем операцию - дохода по партнёрке
+                $this->fixProfit($parent, $sum_profit, $i);
             }
 
-            // переназначение, для рекурсивного обхода
+            // переназначение, для рекурсивного обхода следующих родителей вверх по иерархии
             $model = $parent;
         }
     }
@@ -280,54 +293,66 @@ class BuyPartnerComplekt {
     }
 
     /*
-     * обновляем данные относительно того, кто купил данный комплект
+     * записываем в лог, кто, для кого купил партнёрский комплект
      */
-    public function processingWhoBuys(){
+    public function afterBuy(){
 
-        /*
-        // НЕ первый партнёрский комплект
-        if($this->_partnerModel->status==Partner::STATUS_Partner){
-            $query = $this->_connect->createCommand('UPDATE {{partner}} SET balance=balance-:balanceMinus, active_points=:active_points WHERE id=:id');
-        }elseif($this->_partnerModel->status==Partner::STATUS_MEMBER){// ПЕРВЫЙ партнёрский комплект
-            $this->reg_payment = 400;
-            $query = $this->_connect->createCommand('UPDATE {{partner}} SET balance=:balanceMinus, status=:status WHERE id=:id');
-            $query->bindValue(':status', Partner::STATUS_Partner, PDO::PARAM_INT);
-        }
+        $buyPartnerShip = new BuyingPartnershipSet();
+        // для кого покупается комплект
+        $buyPartnerShip->partner_id = $this->_partnerForWhom->id;
+        // какой комплект он покупает
+        $buyPartnerShip->partnership_set_id = $this->_partner_ship_id;
+        //тип комплекта
+        $buyPartnerShip->type_buying = $this->type_partnership;
 
-        $query->bindValue(':balanceMinus', ($this->price + $this->reg_payment), PDO::PARAM_INT);
-        $query->bindValue(':id', $this->_partnerModel->id, PDO::PARAM_INT);
-        //кол-во балов активности = кол-во комплектов(не_именных)+кол-во рефов_уровня_1(парнёров)
-        //$active_points = $this->_partnerModel->partnershipCount+$this->_partnerModel->countChildren(Partner::STATUS_Partner, 1);
-
-
-        //запрос на обновление параметров по юзеру, котор. купил комплект
-        //$sql = 'UPDATE {{partner}} SET balance=:balanceMinus, partner_level=:partner_level,active_points=:active_points,status=:status WHERE id=:id';
-        //$query = $this->_connect->createCommand($sql);
-
-        $query->bindValue(':active_points',($this->_partnerModel->active_points+1), PDO::PARAM_INT);
-
-
-        $query->bindValue();
-        $query->bindValue();
-
-        $query->execute();*/
-
+        $buyPartnerShip->save();
     }
 
     /*
-     * скидка по партнёрской программе в зависимости от уровня пользователя
+     * фиксируем операции начисления прибылей
+     * $partner - реферал верхнего уровня, по которому обновили данные
+     * level_cooperator - уровень в иерархии
      */
-    public function getDiscountFromPartnerLevel($new_level_partner){
+    public function fixProfit($partner, $sum_profit, $level_cooperator){
 
-    }
+        $profit = new Profit();
 
-    /*
-     * получаем НОВЫЙ уровень партнёра на основании данной покупки
-     * $countChildrenInLevel1 - кол-во рефералов уровня(1), по юзеру котор. покупает комплект+не_именные партнёрские комплекты(включая купленный в данный момент)
-     */
-    public function getPartnerLevel($countChildrenInLevel1){
-        if($countChildrenInLevel1==Partner::SILVER_LEVEL){
-            //return
-        }
+        //Получатель бонуса
+        $profit->destination_account = $partner->id;
+
+        // размер бонуса
+        $profit->point = $sum_profit;
+
+        // отправитель бонуса
+        $profit->sender_account = $this->who_buys;
+
+        //Кол-во пользователей в статусе Партнер у Вас после совершения транзакции
+        $profit->has_partners =  $partner->countChildren(Partner::STATUS_Partner);
+
+        //Кол-во личных Партнерских комплектов у Вас после совершения транзакции
+        $profit->has_personal_partners = ($partner->partnershipCount+1);
+
+        //Кол-во баллов активности у Вас после совершения транзакции
+        $profit->active_points = $partner->active_points;
+
+        //Ваш уровень в Партнерской программе после совершения транзакции
+        $profit->partner_level = $partner->partner_level;
+
+        //Кол-во баллов активности у отправителя после совершения транзакции
+        $profit->active_points_sender = $this->_partnerWhoBuy->active_points;
+
+        //Уровень отправителя в Партнерской Программе после совершения транзакции
+        $profit->partner_level_sender = $this->_partnerWhoBuy->partner_level;
+
+        //Уровень сотрудника как Вашего реферала
+        $profit->level_cooperator = $level_cooperator;
+
+        //Ваш бонус с 1 уровня рефералов после совершения транзакции, %
+        $profit->bonus_from_level1 = 20;
+
+        //Ваш бонус с 2-10 уровней после совершения транзакции, %
+        $profit->bonus_from_other_levels = $partner->bonus_from_other_levels;
+
+        $profit->save();
     }
 }
