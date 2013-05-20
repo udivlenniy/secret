@@ -60,7 +60,7 @@ class NestedSetBehavior extends CActiveRecordBehavior
 
         $owner=$this->getOwner();
 
-        if(!empty($status)){
+        if($status){
             $where = ' AND (status='.$status.')';
         }else{
             $where = '';

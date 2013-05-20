@@ -16,7 +16,8 @@
         if(($childCountMember+$childCountPartner)>0){
             echo $data->getAjaxlink('Подробнее',
                 $this->createUrl('/partner/business/ajaxtbl'),
-                array('Partner[type]'=>'all')
+                ''
+                //array('Partner[type]'=>'all')
             );
         }
     ?> <br>
@@ -40,7 +41,7 @@
     <?
         echo $childCountPartnerLevel1;
         if($childCountPartnerLevel1>0){
-            echo $data->getAjaxlink('Подробнее',$this->createUrl('/partner/business/ajaxtbl'), array('Partner[type]'=>'partner_level1'));
+            echo $data->getAjaxlink('Подробнее',$this->createUrl('/partner/business/ajaxtbl'), array('Partner[type]'=>-1));
         }
     ?>
 </div>

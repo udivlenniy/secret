@@ -54,6 +54,9 @@ class BusinessController extends BaseUserController{
     }
 
     public function actionStructure(){
+
+        Yii::app()->clientScript->registerScriptFile(Yii::app()->assetManager->publish( 'js_plugins/'). '/jquery.tipTip.js', CClientScript::POS_END);
+
         $this->render('structure');
     }
 
@@ -84,11 +87,17 @@ class BusinessController extends BaseUserController{
         if(!Yii::app()->request->isAjaxRequest){
             //throw new CHttpException(400,'Invalid request');
         }
-        $this->render('profit');
+
+        $model = new Profit();
+
+        $this->render('profit', array(
+            'model'=>$model,
+        ));
     }
 
     /**
      * подробная информация о выбранном типе рефералов, указанного уровня или статуса
+     * $model->type = -1 - выводить «Партнеров» на 1 уровне
      */
     public function actionAjaxTbl(){
 
@@ -103,16 +112,20 @@ class BusinessController extends BaseUserController{
         }
 
         $criteria=new CDbCriteria;
-        $criteria->condition = 'lft>'.$model->lft.' AND rgt<='.$model->rgt.' ';
+        $criteria->condition = 'lft>'.$model->lft.' AND rgt<'.$model->rgt.' AND id!='.Yii::app()->user->id;
 
+        // со статусом - участник
         if($model->type==Partner::STATUS_MEMBER){
             $criteria->addColumnCondition(array('status'=>Partner::STATUS_MEMBER));
         }
+        // со статусом - ПАРТНЁР
         if($model->type==Partner::STATUS_Partner){
             $criteria->addColumnCondition(array('status'=>Partner::STATUS_Partner));
         }
-        if($model->type=='partner_level1'){
-            $criteria->condition = 'status='.Partner::STATUS_Partner.' AND level<='.($model->level+1).'';
+        // выводим «Партнеров» на 1 уровне
+        if($model->type==-1){
+            //$criteria->condition = 'status='.Partner::STATUS_Partner.' AND level<='.($model->level+1).'';
+            $criteria->addCondition('status='.Partner::STATUS_Partner.' AND level<='.($model->level+1).'');
         }
 
         $dataProvider = new CActiveDataProvider('Partner', array(
@@ -136,5 +149,20 @@ class BusinessController extends BaseUserController{
         if($model===null)
             throw new CHttpException(404,'The requested page does not exist.');
         return $model;
+    }
+
+    /*
+     * обрабатываем клик юзера по одному из разделов карточки клиента в дереве рефералов
+     */
+    public function actionAjaxInfo(){
+
+        if(!Yii::app()->request->isAjaxRequest){ throw new CHttpException(400,'Invalid request'); }
+
+        // личные данные по выбранному юзеру из дерева
+        if($_POST['type']=='personal'){
+            //ID пользователя, ФИО пользователя/E-mail для новичков,Верифицированный телефонный номер
+            $model = Partner::model()->findByPk((int)$_POST['id']);
+            $this->renderPartial('_ajax_info_personal', array('model'=>$model));
+        }
     }
 }

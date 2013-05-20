@@ -24,16 +24,92 @@ class Partner extends CActiveRecord
     const DIAMONT_LEVEL = 4;
 
     //статус партнёра
-    const STATUS_MEMBER = 0;//участник
-    const STATUS_Partner = 1;//партнер
+    const STATUS_MEMBER = 1;//участник
+    const STATUS_Partner = 2;//партнер
 
     const SALT = '159753159753';
 
     // ссылка на ajax-запрос для получения таблицы данными
     public $ajaxlink;
     public $type;
+    public $TreeFio;
 
+    /*
+     * представление для отображения карточки рефа в дереве структуры
+     */
+    public function getTreeFio($model){
 
+        if($model->status==self::STATUS_MEMBER){ $class = 'member';}
+        if($model->status==self::STATUS_Partner){ $class = 'partner'; }
+
+        //подсвечиваем нужными классами карточки, в зависимости от СТАТУСА
+        $title = '<div class="'.$class.'">';
+        $title.='<div class="section">'.$this->getLinkTree('Личное', Yii::app()->createUrl('partner/business/ajaxinfo'), array('id'=>$model->id, 'type'=>'personal')).'</div>';
+        $title.='<div class="section">'.$this->getLinkTree('Бизнес', Yii::app()->createUrl('partner/business/ajaxinfo'), array('id'=>$model->id, 'type'=>'business')).'</div>';
+        $title.='<div class="section">'.$this->getLinkTree('Доход', Yii::app()->createUrl('partner/business/ajaxinfo'), array('id'=>$model->id, 'type'=>'profit')).'</div>';
+        $title.='<div class="fio">'.CHtml::link($model->fio, 'javascript:void(0)').'</div>';
+
+        $title.='</div>';
+
+        return $title;
+    }
+
+    /*
+     * получаем ссылку для дерева - карточка с обработчиком ссылки
+     * $type - тип данных, котор. мы получим при клике на сформированную ссылку
+     * $data - массив данных, которые мы передаём на контроллер
+     * $url - адрес, для отправки данных в запросе, на получение данных при клике на ссылку
+     */
+    public function getLinkTree($label, $url, $data){
+
+        $id = uniqid();
+
+        return
+        /*CHtml::ajaxLink(
+            $label,
+            $url,
+            array(
+                'type' => 'POST',
+                // можно спросить до отправки что-то или проверить данные какие-нибудь.
+                'beforeSend' => "function(request){ alert(); }",
+                'success' => "function(data){
+                 }",
+                'data' => $data, // посылаем значения
+                'cache'=>'false' // если нужно можно закешировать
+            ),
+            array( // самое интересное
+                'href' => 'javascript: void(0)',// подменяет ссылку на левую
+                'class' => $data['type'], // добавляем какой-нить класс для оформления
+                //'id'=>uniqid(),
+                'id'=>$data['id'],
+                'style'=>'margin-left:0px;'
+            )
+        );*/
+            CHtml::link($label, $url ,
+                array(
+                    // for htmlOptions
+                    'onclick' => '{' . CHtml::ajax(array(
+                        'url'=>$url,
+                        'type'=>'POST',
+                        'data'=>$data,
+                        'beforeSend' => 'js:function(eventObject){
+                        }',
+                        'success' => "js:function(html){
+                            $('#".$id."').attr('title',html);
+                            $('#".$id."').tipTip({defaultPosition: 'right', 'activation':'hover', 'delay':0, 'maxWidth':'550'});
+                        }")) .
+                        'return false;
+                    }', // returning false prevents the default navigation to another url on a new page
+                    'class' => 'row-tree',
+                    'id' => $id,
+                    'title'=>'',
+                )
+            );
+    }
+
+    /*
+     * формирование ветки дерева
+     */
     public function treechild($id, $recursive = true)
     {
         $curnode = Partner::model()->findByPk($id);
@@ -44,7 +120,7 @@ class Partner extends CActiveRecord
                 foreach($childrens as $children){
                     if($recursive){
                         //$currow=['id'=>$children->id,'text'=>$children->fio,'children'=>$this->treechild($children->id)];
-                        $currow=array('id'=>$children->id,'text'=>$children->fio,'children'=>$this->treechild($children->id));
+                        $currow=array('id'=>$children->id,'text'=>$children->getTreeFio($children),'children'=>$this->treechild($children->id));
                     }else{
                         $curnode = Partner::model()->findByPk($children->id);
                         $referals = $curnode->children()->findAll();
@@ -54,7 +130,7 @@ class Partner extends CActiveRecord
                             $hasChildren = false;
                         }
                         //$currow=['id'=>$children->id,'text'=>$children->fio, 'hasChildren'=>$hasChildren];
-                        $currow=array('id'=>$children->id,'text'=>$children->fio, 'hasChildren'=>$hasChildren);
+                        $currow=array('id'=>$children->id,'text'=>$children->getTreeFio($children), 'hasChildren'=>$hasChildren);
                     }
 
                     $out[]=$currow;
@@ -68,6 +144,9 @@ class Partner extends CActiveRecord
         return null;
     }
 
+    /*
+     * построение дерева
+     */
     public function treedata($root, $showRoot = true)
     {
         if($showRoot){
@@ -75,7 +154,7 @@ class Partner extends CActiveRecord
             $out = array();
             // получаем список дочерних элементов, без рекурсии
             //$currow=['id'=>$root->id,'text'=>$root->fio,'children'=>$this->treechild($root->id, false)];
-            $currow=array('id'=>$root->id,'text'=>$root->fio,'children'=>$this->treechild($root->id, false));
+            $currow=array('id'=>$root->id,'text'=>$root->getTreeFio($root),'children'=>$this->treechild($root->id, false));
             $out[]=$currow;
 
             return $out;
@@ -86,7 +165,7 @@ class Partner extends CActiveRecord
             $out = array();
             foreach($ancestors as $ancestor){
                 //$currow=['id'=>$ancestor->id,'text'=>$ancestor->fio,'children'=>$this->treechild($ancestor->id, false)];
-                $currow=array('id'=>$ancestor->id,'text'=>$ancestor->fio,'children'=>$this->treechild($ancestor->id, false));
+                $currow=array('id'=>$ancestor->id,'text'=>$ancestor->getTreeFio($ancestor),'children'=>$this->treechild($ancestor->id, false));
                 $out[]=$currow;
             }
             return $out;
@@ -154,7 +233,7 @@ class Partner extends CActiveRecord
 		// will receive user inputs.
 		return array(
 			//array('lft, rgt, level, name, description', 'required'),
-			array('level', 'numerical', 'integerOnly'=>true),
+			array('level, type', 'numerical', 'integerOnly'=>true),
 			//array('root', 'length', 'max'=>20),
 			//array('lft, rgt', 'length', 'max'=>10),
 			//array('fio', 'length', 'max'=>128),
