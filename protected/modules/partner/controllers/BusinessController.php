@@ -55,8 +55,6 @@ class BusinessController extends BaseUserController{
 
     public function actionStructure(){
 
-        Yii::app()->clientScript->registerScriptFile(Yii::app()->assetManager->publish( 'js_plugins/'). '/jquery.tipTip.js', CClientScript::POS_END);
-
         $this->render('structure');
     }
 
@@ -72,6 +70,24 @@ class BusinessController extends BaseUserController{
         $dataProviderPartnershipSet = new CActiveDataProvider('PartnershipSet');
 
         $model = $this->loadPartner();
+
+        //заполнение данных для отправки смс-сообщения
+        $model->SMSFeedbackBehavior->textSms = 'тестовое смс сообщение';
+        $model->SMSFeedbackBehavior->phoneSms = '380978800696';
+        //$model->SMSFeedbackBehavior->phoneSms = '380978800696';
+
+        // проверка перед отправкой смс
+        $model->checkParams();
+
+        // отправка смс-сообщения
+        //$model->sendSms();
+
+        //проверка резльутата доставки смс-сообщения
+        if($model->isDeliveredSms()){
+           echo '<h2>сообщение доставлено</h2>';
+        }else{
+            echo '<h2>В процессе отправки смс-сообщения возникли ошибки:'.$model->error_descSms.'</h2>';
+        }
 
         $this->render('personal',array(
             'model'=>$model,
@@ -142,9 +158,13 @@ class BusinessController extends BaseUserController{
         );
     }
 
-    public function loadPartner(){
+    public function loadPartner($id=''){
 
-        $model = Partner::model()->findByPk(Yii::app()->user->id);
+        if(!empty($id)){
+            $model = Partner::model()->findByPk($id);
+        }else{
+            $model = Partner::model()->findByPk(Yii::app()->user->id);
+        }
 
         if($model===null)
             throw new CHttpException(404,'The requested page does not exist.');
@@ -158,11 +178,48 @@ class BusinessController extends BaseUserController{
 
         if(!Yii::app()->request->isAjaxRequest){ throw new CHttpException(400,'Invalid request'); }
 
+        //echo '<pre>'; print_r($_REQUEST); die();
+
         // личные данные по выбранному юзеру из дерева
         if($_POST['type']=='personal'){
             //ID пользователя, ФИО пользователя/E-mail для новичков,Верифицированный телефонный номер
-            $model = Partner::model()->findByPk((int)$_POST['id']);
+            $model = $this->loadPartner($_POST['id']);
             $this->renderPartial('_ajax_info_personal', array('model'=>$model));
+            Yii::app()->end();
         }
+
+        // бизнесс данные по пользователю
+        if($_POST['type']=='business'){
+
+            $partner = $this->loadPartner($_POST['id']);
+
+            //$data[partner_level_from_me]-расстояние от текущего аккаунта до рассматриваемого сотрудника структуры
+
+            // текущий партнёр
+            $model = $this->loadPartner();
+
+            $data['partner_level_from_me']= $partner->level - $model->level;
+
+            $this->renderPartial('_ajax_info_business', array(
+                'data'=>$data,
+                'partner'=>$partner,
+            ));
+            Yii::app()->end();
+        }
+        // прибыль по партнёрской программе
+        if($_POST['type']=='profit'){
+
+            //$data['profit_for_me']-Моя прибыль по Партнерской Программе, сколько денег принём именно мне - выбранный юзер
+            $profit = new Profit();
+
+            $data['profit_for_me'] = $profit->inComeProfit('', '', (int)$_POST['id']);
+
+            $this->renderPartial('_ajax_info_profit', array(
+                'data'=>$data,
+            ));
+            Yii::app()->end();
+        }
+
+        throw new CHttpException(400,'The requested page does not exist.');
     }
 }

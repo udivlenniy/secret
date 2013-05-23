@@ -34,6 +34,8 @@ class Partner extends CActiveRecord
     public $type;
     public $TreeFio;
 
+    public $referal_email;// адрес почты реферала пригласившего юзера
+
     /*
      * представление для отображения карточки рефа в дереве структуры
      */
@@ -65,44 +67,13 @@ class Partner extends CActiveRecord
         $id = uniqid();
 
         return
-        /*CHtml::ajaxLink(
-            $label,
-            $url,
-            array(
-                'type' => 'POST',
-                // можно спросить до отправки что-то или проверить данные какие-нибудь.
-                'beforeSend' => "function(request){ alert(); }",
-                'success' => "function(data){
-                 }",
-                'data' => $data, // посылаем значения
-                'cache'=>'false' // если нужно можно закешировать
-            ),
-            array( // самое интересное
-                'href' => 'javascript: void(0)',// подменяет ссылку на левую
-                'class' => $data['type'], // добавляем какой-нить класс для оформления
-                //'id'=>uniqid(),
-                'id'=>$data['id'],
-                'style'=>'margin-left:0px;'
-            )
-        );*/
-            CHtml::link($label, $url ,
+            CHtml::link($label, 'javascript::void(0)' ,
                 array(
-                    // for htmlOptions
-                    'onclick' => '{' . CHtml::ajax(array(
-                        'url'=>$url,
-                        'type'=>'POST',
-                        'data'=>$data,
-                        'beforeSend' => 'js:function(eventObject){
-                        }',
-                        'success' => "js:function(html){
-                            $('#".$id."').attr('title',html);
-                            $('#".$id."').tipTip({defaultPosition: 'right', 'activation':'hover', 'delay':0, 'maxWidth':'550'});
-                        }")) .
-                        'return false;
-                    }', // returning false prevents the default navigation to another url on a new page
+                    // returning false prevents the default navigation to another url on a new page
                     'class' => 'row-tree',
                     'id' => $id,
-                    'title'=>'',
+                    'title'=>'type='.$data['type'].'&id='.$data['id'],// переменные для формирования всплывающей подсказки
+                    'data_tooltip'=>'',// записываем сюда текст всплывающей подсказки
                 )
             );
     }
@@ -175,6 +146,7 @@ class Partner extends CActiveRecord
     public function behaviors()
     {
         return array(
+            //работа с деревьями
             'nestedSetBehavior'=>array(
                 'class'=>'application.behaviors.NestedSetBehavior',
                 'leftAttribute'=>'lft',
@@ -184,7 +156,12 @@ class Partner extends CActiveRecord
             ),
             'PartnerProgrammBehavior'=>array(
                 'class'=>'application.behaviors.PartnerProgrammBehavior'
-            )
+            ),
+            // отправка смс-сообщений
+            'SMSFeedbackBehavior'=>array(
+                'class'=>'application.behaviors.SMSFeedbackBehavior',
+            ),
+
 //            'TreeBehavior' => array(
 //              'class' => 'application.behaviors.XTreeBehavior',
 //                'treeLabelMethod'=> 'getTreeLabel',
@@ -229,20 +206,48 @@ class Partner extends CActiveRecord
 	 */
 	public function rules()
 	{
-		// NOTE: you should only define rules for those attributes that
-		// will receive user inputs.
 		return array(
 			//array('lft, rgt, level, name, description', 'required'),
 			array('level, type', 'numerical', 'integerOnly'=>true),
 			//array('root', 'length', 'max'=>20),
 			//array('lft, rgt', 'length', 'max'=>10),
-			//array('fio', 'length', 'max'=>128),
+
             array('fio, type', 'length', 'max'=>256),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('id,  lft, rgt, level, type, status', 'safe', 'on'=>'search'),
+
+            //валидация параметров при регистрации нового партнёра
+            array('fio, phone, email, password, referal_email', 'required' , 'on'=>'insert'),
+            array('email, referal_email', 'email','on'=>'insert'),
+            array('phone','phone','on'=>'insert'),
+            array('fio', 'length', 'max'=>128, 'on'=>'insert'),
+            array('referal_email', 'validateReferalEmail', 'on'=>'insert'),
 		);
 	}
+
+    /*
+     * проверка существования реферала по его почте, к которому мы будем подвязывать зарегавшегося партнёра
+     */
+    public function validateReferalEmail(){
+        if(!$this->hasErrors()){
+
+            $db = Yii::app()->db;
+
+            $query = $db->createCommand('SELECT id FROM {{partner}} WHERE email=:email');
+
+            $query->bindValue(':email', $this->referal_email, PDO::PARAM_STR);
+
+            $result = $query->queryRow();
+
+            if(empty($result)){
+                $this->addError('referal_email', 'По указанной почте - партнёр не найден');
+                return false;
+            }
+
+            return true;
+        }
+    }
 
 	/**
 	 * @return array relational rules.
@@ -253,28 +258,10 @@ class Partner extends CActiveRecord
 		// class name for the relations automatically generated below.
         return array(
 
-            //'parent' => array(self::BELONGS_TO, 'Partner', 'root'),
-
             // кол-во НЕ_именных партнёрских комплектов
             'partnershipCount' => array(self::STAT, 'BuyingPartnershipSet', 'who_buys',
                 'condition'=>'type_buying='.BuyingPartnershipSet::TYPE_NONAME
             ),
-//
-//            'children' => array(self::HAS_MANY, 'Partner', 'parent_id', 'order' => 'level'),
-//
-//            //всего дочерних сотрудников
-//            'childCount' => array(self::STAT, 'Partner', 'parent_id'),
-//
-//            //сотрудников дочерних в статусе - Партнёр
-//            'childCountPartner' => array(self::STAT, 'Partner', 'parent_id', 'condition'=>'status='.self::STATUS_Partner),
-//
-//            //сотрудников дочерних в статусе - Партнёр, уровня(1)
-//            'childCountPartnerLevel1' => array(self::STAT, 'Partner', 'parent_id',
-//                'condition'=>'status='.self::STATUS_Partner.' AND parent_id='.Yii::app()->user->id.''
-//            ),
-//
-//            //сотрудников дочерних в статусе - Участник
-//            'childCountMember' => array(self::STAT, 'Partner', 'parent_id', 'condition'=>'status='.self::STATUS_MEMBER),
 
         );
     }
@@ -431,5 +418,21 @@ class Partner extends CActiveRecord
      */
     public function encrypting($password){
         return md5($password.md5(self::SALT));
+    }
+
+    /*
+     * получаем информацию о балансе пользователя
+     */
+    static function getBalance($user_id){
+        if(empty($user_id)){
+            return '';
+        }else{
+            $sql = 'SELECT balance FROM {{partner}} WHERE id=:id';
+            $connect = Yii::app()->db;
+            $query = $connect->createCommand($sql);
+            $query->bindValue(':id', $user_id);
+            $result = $query->queryRow();
+            return $result['balance'];
+        }
     }
 }

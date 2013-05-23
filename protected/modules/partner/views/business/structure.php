@@ -23,26 +23,58 @@ $this->widget('CTreeView',array(
 
 
 <script type="text/javascript">
-    /*
-    $(".row-tree").click(function (eventObject) {
 
-        //$data_tooltip = $(this).attr("data-tooltip");
-        $data_tooltip = 'sdf sdf sd fsdf';
+    $(document).ready(function() {
 
-        $("#tooltip").text($data_tooltip)
-            .css({
-                "top" : eventObject.pageY + 5,
-                "left" : eventObject.pageX + 5
-            })
-            .show();
+        $('.row-tree').live("click", function(event){
+            // если данные уже отправлялись по данной ссылке, то выводим их, повторно не отправляем
+            $data_tooltip = $(this).attr("title");
 
-    }).mouseout(function () {
+            /*
+            var hint = $('#'+event.target.id).attr("data_tooltip");
 
-            $("#tooltip").hide()
-                .text("")
-                .css({
-                    "top" : 0,
-                    "left" : 0
+            if(hint) {
+
+                $("#tooltip").html(hint);
+
+                $("#tooltip").css({
+                    "top" : event.pageY + 5,
+                    "left" : event.pageX + 5
                 });
-        });*/
+                $("#tooltip").show();
+            }else{*/
+                $.ajax({
+                    url: '/partner/business/ajaxinfo',             // указываем URL и
+                    type: 'POST',
+                    data:$data_tooltip,
+                    //dataType : "json",                     // тип загружаемых данных
+                    success: function (data, textStatus) { // вешаем свой обработчик на функцию success
+
+                        $('#'+event.target.id).attr('data_tooltip',data);
+
+                        $("#tooltip").html(data);
+
+                        $("#tooltip").css({
+                            "top" : event.pageY + 5,
+                            "left" : event.pageX + 5
+                        });
+                        $("#tooltip").show();
+                    }
+                });
+            /*}*/
+            return false;
+
+        })
+        // прячем всплывающее окно сообщений
+        $("#tooltip").live("click",function () {
+
+                $("#tooltip").hide()
+                    .text("")
+                    .css({
+                        "top" : 0,
+                        "left" : 0
+                    });
+            });
+
+    });// Ready end.
 </script>

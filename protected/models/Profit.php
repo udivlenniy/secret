@@ -76,8 +76,9 @@ class Profit extends CActiveRecord
      * заработок за интервал времени по партнёрской программе
      * в разрезе текущего юзера
      * по выбранному интервалу дат
+     * $sender_account - от какого юзера мы получили прибыль
      */
-    public function inComeProfit($dataFrom='', $dataTo=''){
+    public function inComeProfit($dataFrom='', $dataTo='', $sender_account=''){
 
         $connect = Yii::app()->db;
 
@@ -89,6 +90,10 @@ class Profit extends CActiveRecord
 
         if($dataFrom){
             $where.=' AND create_at<'.strtotime($dataTo);
+        }
+
+        if($sender_account){
+            $where.=' AND sender_account='.$sender_account;
         }
 
         $select = 'SELECT SUM(point) AS profit FROM {{finance_partnership}}';

@@ -68,6 +68,10 @@
                             array('label'=>'История счета', 'url'=>array('/partner/business/personal')),
                         )
                     ),
+                    array(
+                        'label'=>'Баланс:'.Partner::getBalance(Yii::app()->user->id).'(бал.)', 'visible'=>!Yii::app()->user->isGuest
+
+                    ),
                     array('label'=>'Выйти', 'url'=>array('/site/logout'), 'visible'=>!Yii::app()->user->isGuest)
 
                     //array('label'=>'Login', 'url'=>array('site/login'), 'visible'=>Yii::app()->user->isGuest),
