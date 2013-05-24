@@ -95,7 +95,7 @@ class BusinessController extends BaseUserController{
             'dataProviderPartnerComplekts'=>$dataProviderPartnershipSet
         ));
     }
-    
+
 
     /*
      * доход пользователя от партнёрской программы+потребительской программы
