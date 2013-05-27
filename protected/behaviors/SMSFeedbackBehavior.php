@@ -26,8 +26,8 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
     public $balanceSms;// баланс пользователя
     public $valute;// валюта пользователя
 
-    public $hostSms;// хост сайта, АПИ котор. мы будем использовать
-    public $portSms;// какой порт исползовать при отправке GET запроса через сокеты
+    public $hostSms='api.smsfeedback.ru';// хост сайта, АПИ котор. мы будем использовать
+    public $portSms = 80;// какой порт исползовать при отправке GET запроса через сокеты
     public $phoneSms;// номер телефона, куда отправляем СМС
     public $senderSms = false;
     public $textSms;//текст сообщения
@@ -72,6 +72,10 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
     /*
     * функция - генератор паролей для смс
     */
+
+    public function getIdSms(){
+        return $this->id_sms;
+    }
 
     // Параметр $number - сообщает число символов в пароле
 
@@ -151,8 +155,8 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
                 fwrite($fp, "GET /messages/v2/send/" .
                     "?phone=" . rawurlencode($this->phoneSms) .
                     "&text=" . rawurlencode($this->textSms) .
-                    ($this->sender ? "&sender=" . rawurlencode($this->senderSms) : "") .
-                    ($this->wapurl ? "&wapurl=" . rawurlencode($this->wapurlSMs) : "") .
+                    ($this->senderSms ? "&sender=" . rawurlencode($this->senderSms) : "") .
+                    ($this->wapurlSMs ? "&wapurl=" . rawurlencode($this->wapurlSMs) : "") .
                     "  HTTP/1.0\n");
                 fwrite($fp, "Host: " . $this->hostSms . "\r\n");
                 if ($this->loginService != "") {
@@ -166,6 +170,8 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
                 }
                 fclose($fp);
                 list($other, $responseBody) = explode("\r\n\r\n", $response, 2);
+
+                //echo 'responseBody='.$responseBody.'<br>'; flush();
 
                 // проверим результат отправки запроса
                 $this->checkResponse($responseBody);
@@ -230,7 +236,8 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
     public function isDeliveredSms(){
 
         // цикл по попыткам
-        for($i=0;$i<1000;$i++){
+        for($i=0;$i<20;$i++){
+
             if(!empty($this->id_sms) && !$this->errorSms){
 
                 // проверим доставку СМС-сообщения до адресата
@@ -244,6 +251,7 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
             if($this->errorSms){
                 return false;
             }
+
             sleep(1);
         }
 

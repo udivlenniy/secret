@@ -20,28 +20,32 @@ $this->breadcrumbs=array(
 		'validateOnSubmit'=>true,
 	),
 )); ?>
+        <?php if($showFileds){?>
+            <div id="show_sms" ">
+                <div class="row">
+                    <?php echo $form->labelEx($model,'smsCode'); ?>
+                    <?php echo $form->passwordField($model,'smsCode'); ?>
+                    <?php echo $form->error($model,'smsCode'); ?>
+                    <?php
+                        echo $form->hiddenField($model,'username');
+                        echo $form->hiddenField($model,'password');
+                    ?>
+                </div>
+            </div>
+        <?php }else{?>
 
-    <?php if($showFileds){ ?>
+            <div class="row">
+                <?php echo $form->labelEx($model,'username'); ?>
+                <?php echo $form->textField($model,'username'); ?>
+                <?php echo $form->error($model,'username'); ?>
+            </div>
 
-        <div class="row">
-            <?php echo $form->labelEx($model,'username'); ?>
-            <?php echo $form->textField($model,'username'); ?>
-            <?php echo $form->error($model,'username'); ?>
-        </div>
-
-        <div class="row">
-            <?php echo $form->labelEx($model,'password'); ?>
-            <?php echo $form->passwordField($model,'password'); ?>
-            <?php echo $form->error($model,'password'); ?>
-        </div>
-
-    <?php }else{ ?>
-        <div class="row">
-            <?php echo $form->labelEx($model,'smsCode'); ?>
-            <?php echo $form->passwordField($model,'smsCode'); ?>
-            <?php echo $form->error($model,'smsCode'); ?>
-        </div>
-    <?php } ?>
+            <div class="row">
+                <?php echo $form->labelEx($model,'password'); ?>
+                <?php echo $form->passwordField($model,'password'); ?>
+                <?php echo $form->error($model,'password'); ?>
+            </div>
+        <?php } ?>
 
 <!--	<div class="row buttons">-->
 <!--		--><?php //echo CHtml::submitButton('Авторизация'); ?>
@@ -49,7 +53,7 @@ $this->breadcrumbs=array(
     <?
 
     echo CHtml::ajaxLink(
-            "Авторизация",
+        ($showFileds)?"Подтвердить СМС":"Авторизация",
             Yii::app()->createUrl('admin/profil/login'),
         array( // ajaxOptions
             'type' =>'POST',
@@ -58,7 +62,11 @@ $this->breadcrumbs=array(
             }",
             'success' => "function(data){
                 // handle return data
-                $('#admin_login').html(data);
+                if(data=='ok'){
+                    location.href='';
+                }else{
+                    $('#admin_login').html(data);
+                }
             }",
             'data' => 'js:$("#admin-form").serialize()',
         ),

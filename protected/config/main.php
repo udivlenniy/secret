@@ -22,6 +22,7 @@ return array(
 	'import'=>array(
 		'application.models.*',
 		'application.components.*',
+        'application.extensions.yii-mail.*',
 	),
 
 	'modules'=>array(
@@ -51,6 +52,21 @@ return array(
 
 	// application components
 	'components'=>array(
+
+        'mail' => array(
+            'class' => 'ext.yii-mail.YiiMail',
+            'transportType' => 'smtp',
+            'transportOptions' => array(
+                'host' => 'smtp.gmail.com',
+                'username' => 'juniorspecialistphp@gmail.com',
+                'password' => 'biblos123',
+                'port' => '465',
+                'encryption'=>'tls',
+            ),
+            'viewPath' => 'application.views.mail',
+            'logging' => false,
+            'dryRun' => false
+        ),
 
         'config'=>array(
             'class'=>'application.components.config.DConfig',
@@ -140,6 +156,6 @@ return array(
 	// using Yii::app()->params['paramName']
 	'params'=>array(
 		// this is used in contact page
-		'adminEmail'=>'webmaster@example.com',
+		'adminEmail'=>'alexsashkan@mail.ru',
 	),
 );

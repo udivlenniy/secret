@@ -24,14 +24,12 @@ class Login extends CFormModel{
             // username and password are required
             array('username, password', 'required','on'=>'login'),
             array('username','email','on'=>'login'),
-            // rememberMe needs to be a boolean
-            //array('rememberMe', 'boolean'),
-            // password needs to be authenticated
             array('password', 'authenticate','on'=>'login'),
 
             // проверяем отправленный смс-код на телефон
-            array('smsCode', 'required','on'=>'sms'),
+            array('username, password,smsCode', 'required','on'=>'sms'),
             array('smsCode','validateSms', 'on'=>'sms'),
+            array('username, password', 'length','min'=>1,'on'=>'sms'),
         );
     }
 
@@ -66,10 +64,11 @@ class Login extends CFormModel{
     {
         if(!$this->hasErrors())
         {
+            $this->_identity = new UserIdentity($this->username,$this->password);
 
-            $this->_identity=new AUserIdentity($this->username,$this->password);
+            $this->_identity->is_Admin = false;
 
-            if(!$this->_identity->authenticate()){
+            if(!$this->_identity->authenticateAdmin()){
                 $this->addError('password','Не правильно указан логин или пароль.');
             }
         }
@@ -81,12 +80,15 @@ class Login extends CFormModel{
      */
     public function login()
     {
+        echo 'login<br>';
+
         if($this->_identity===null)
         {
-            $this->_identity=new AUserIdentity($this->username,$this->password);
-            $this->_identity->authenticate();
+            $this->_identity=new UserIdentity($this->username,$this->password);
+            $this->_identity->is_Admin = true;
+            $this->_identity->authenticateAdmin();
         }
-        if($this->_identity->errorCode===AUserIdentity::ERROR_NONE)
+        if($this->_identity->errorCode===UserIdentity::ERROR_NONE)
         {
             //$duration=$this->rememberMe ? 3600*24*30 : 0; // 30 days
             $duration = 0;

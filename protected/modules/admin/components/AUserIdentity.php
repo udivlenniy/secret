@@ -11,6 +11,8 @@ class AUserIdentity extends CUserIdentity
     private $_id;
     private $_status;
 
+    public $can_createSession = false;
+
     /**
      * Authenticates a user.
      * The example implementation makes sure if the username and password
@@ -26,23 +28,20 @@ class AUserIdentity extends CUserIdentity
         $model = new Partner();
 
         if(Yii::app()->config->get('ADMIN.EMAIL')!=$this->username){
-
             $this->errorCode=self::ERROR_USERNAME_INVALID;
-
         }elseif(Yii::app()->config->get('ADMIN.PASSWORD')!==$model->encrypting($this->password)){
-
             $this->errorCode=self::ERROR_PASSWORD_INVALID;
-
         }else{
-
             $this->errorCode=self::ERROR_NONE;
 
-            $this->_id = $model->id;
-            //$this->_status = $model->status;
-
-            //$this->setState('status', $model->status);
-            $this->setState('role', Partner::ROLE_ADMIN);
-            $this->setState('id', 1);
+            if($this->can_createSession){
+                $this->_id = 1;
+                //$this->_status = $model->status;
+                //$this->setState('status', $model->status);
+                $this->setState('role', Partner::ROLE_ADMIN);
+                $this->setState('id', 1);
+                echo 'auth<br>';
+            }
         }
 
         return !$this->errorCode;

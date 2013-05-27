@@ -31,7 +31,7 @@ class BaseAdminController extends BaseController{
             array('allow',  // allow all users to perform 'index' and 'view' actions
                 //'actions'=>array('index','view'),
                 //'users'=>array('*'),
-                'expression' => 'isset(Yii::app()->user->role) && (Yii::app()->user->role==='.Partner::ROLE_ADMIN.')',
+                'expression' => 'isset(Yii::app()->user->role) && (Yii::app()->user->role=='.Partner::ROLE_ADMIN.')',
             ),
             array('deny',  // deny all users
                 'users'=>array('*'),
