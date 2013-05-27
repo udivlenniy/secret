@@ -33,6 +33,7 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
     public $textSms;//текст сообщения
     public $wapurlSMs = false;
     public $codeSms;// код смс, котор. отправили юзеру, для подтверждения операции
+    public $salt = 15975333;
 
     private  $id_sms;//ID смс на сервере отправки смс-сообщений
     private $status_sms;// статус смс сообщения
@@ -89,7 +90,20 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
 
         $this->codeSms = $pass;
 
+        Yii::app()->session->add('smsCode', md5($pass.$this->salt));
+
         return $pass;
+    }
+
+    /*
+     * проверим на валидацию код смс из сессии и с тем, что юзер ввёл в поле для подтверждения
+     */
+    public function isValidateSmsCode($userSmsCode){
+        if(md5($userSmsCode.$this->salt)==Yii::app()->session->get('smsCode')){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     /*
