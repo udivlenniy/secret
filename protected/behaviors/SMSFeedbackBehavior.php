@@ -12,8 +12,6 @@
  * $model->sendSms();
  * $model->isDeliveredSms();- true - сообщение доставлено, false -  не досталено(в error_descSms - описание ошибки)
  */
-
-
 class SMSFeedbackBehavior extends CActiveRecordBehavior{
 
     //amazing1
@@ -34,6 +32,7 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
     public $senderSms = false;
     public $textSms;//текст сообщения
     public $wapurlSMs = false;
+    public $codeSms;// код смс, котор. отправили юзеру, для подтверждения операции
 
     private  $id_sms;//ID смс на сервере отправки смс-сообщений
     private $status_sms;// статус смс сообщения
@@ -87,6 +86,9 @@ class SMSFeedbackBehavior extends CActiveRecordBehavior{
             $index = rand(0, count($arr) - 1);
             $pass .= $arr[$index];
         }
+
+        $this->codeSms = $pass;
+
         return $pass;
     }
 

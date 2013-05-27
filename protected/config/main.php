@@ -10,7 +10,7 @@ return array(
 	'name'=>'',
 
 	// preloading 'log' component
-	'preload'=>array('log'),
+	'preload'=>array('log', 'config'),
 
     // язык поумолчанию
     'sourceLanguage' => 'en_US',
@@ -29,7 +29,17 @@ return array(
 	'modules'=>array(
 
         //сделан ввиде модуля, чтобы позднее было проще переносить на другую самописную структуру
-        'partner',//модуль парнёрки(включает админку и пользовательский функционал)
+
+
+        //модуль парнёрки(включает админку и пользовательский функционал)
+        'partner'=>array(
+            'defaultController' => 'business',
+        ),
+
+        // модуль админки  - логин и пароль храним как отдельные настройки системы
+        'admin'=>array(
+            'defaultController' => 'profil',
+        ),
 
 		// uncomment the following to enable the Gii tool
 		'gii'=>array(
@@ -43,6 +53,26 @@ return array(
 
 	// application components
 	'components'=>array(
+
+        'config'=>array(
+            'class'=>'application.components.config.DConfig',
+            'cache'=>0,
+        ),
+
+        // установим некоторые значения - по умолчанию
+        'widgetFactory'=>array(
+            'widgets'=>array(
+                'CLinkPager'=>array(
+                    'maxButtonCount'=>5,
+                    'cssFile'=>false,
+                    'pageSize'=>100,
+
+                ),
+                'CJuiDatePicker'=>array(
+                    'language'=>'ru',
+                ),
+            ),
+        ),
 
         'cache'=>array(
             'class'=>'system.caching.CFileCache',

@@ -12,19 +12,24 @@ class ContactForm extends CFormModel
 	public $subject;
 	public $body;
 	public $verifyCode;
+    public $phone;
 
 	/**
 	 * Declares the validation rules.
 	 */
 	public function rules()
 	{
+        //Yii::import('application.components.DPhone');
 		return array(
 			// name, email, subject and body are required
-			array('name, email, subject, body', 'required'),
+			array('name, email, subject, body, phone', 'required'),
 			// email has to be a valid email address
 			array('email', 'email'),
+
+            array('phone', 'filter','filter'=>array('MainFilter', 'mobilePhone')),
+            array('phone','DPhone'),
 			// verifyCode needs to be entered correctly
-			array('verifyCode', 'captcha', 'allowEmpty'=>!CCaptcha::checkRequirements()),
+			//array('verifyCode', 'captcha', 'allowEmpty'=>!CCaptcha::checkRequirements()),
 		);
 	}
 
@@ -37,6 +42,8 @@ class ContactForm extends CFormModel
 	{
 		return array(
 			'verifyCode'=>'Verification Code',
+            'phone'=>'Телефон',
 		);
 	}
+
 }

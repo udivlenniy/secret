@@ -7,6 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 ?>
+
 <h2>Личное развитие:</h2>
 
 <strong>Статус:</strong> <?=$model->statuspartner;?> <br>
@@ -15,23 +16,17 @@
 
 <strong>Процент отчислений с взносов сотрудников 2-10 уровней:</strong> <?=$model->bonus_from_other_levels?>% <br>
 
-<!--доступно только Участникам и Партнерам-->
-<!--<strong>Уровень в потребительской программе:</strong> --><?//=$status?><!-- <br>-->
-
 <?
-if($parent!==null){
-    echo '<strong>Id спонсора:</strong> '.$parent->id.'<br>';
-}
+    if($parent!==null){ echo '<strong>Id спонсора:</strong> '.$parent->id.'<br>';}
 ?>
 
 <?
-if($parent!==null){
-    echo '<strong>ФИО спонсора:</strong> '.$parent->fio.'<br><br><br>';
-}
+    if($parent!==null){echo '<strong>ФИО спонсора:</strong> '.$parent->fio.'<br><br><br>';}
 ?>
 
 <?
 //_partner_complects
+//$this->widget('ext.jgrowl.Jgrowl', array('message'=>'Заработала! фыва фыв афыв афы вафы ваф ыва фыва длофыва лдофырва лфрывалофрылаворфылова'));
 
 $this->widget('zii.widgets.CListView', array(
     'dataProvider'=>$dataProviderPartnerComplekts,

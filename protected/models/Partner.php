@@ -220,11 +220,18 @@ class Partner extends CActiveRecord
             //валидация параметров при регистрации нового партнёра
             array('fio, phone, email, password, referal_email', 'required' , 'on'=>'insert'),
             array('email, referal_email', 'email','on'=>'insert'),
-            array('phone','phone','on'=>'insert'),
+            //array('phone','phone','on'=>'insert'),
+            // применяем фильтр от ненужных символов
+            array('phone', 'filter','filter'=>array('MainFilter', 'mobilePhone')),
+            //  валидируем номер по коду страны+коду существующих операторов
+            array('phone','DPhone'),
+
             array('fio', 'length', 'max'=>128, 'on'=>'insert'),
             array('referal_email', 'validateReferalEmail', 'on'=>'insert'),
 		);
 	}
+
+
 
     /*
      * проверка существования реферала по его почте, к которому мы будем подвязывать зарегавшегося партнёра
@@ -427,7 +434,7 @@ class Partner extends CActiveRecord
         if(empty($user_id)){
             return '';
         }else{
-            $sql = 'SELECT balance FROM {{partner}} WHERE id=:id';
+            $sql = 'SELECT balance FROM {{partner}} WHERE id=:id LIMIT 1';
             $connect = Yii::app()->db;
             $query = $connect->createCommand($sql);
             $query->bindValue(':id', $user_id);

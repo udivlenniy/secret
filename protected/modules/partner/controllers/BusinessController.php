@@ -71,23 +71,6 @@ class BusinessController extends BaseUserController{
 
         $model = $this->loadPartner();
 
-        //заполнение данных для отправки смс-сообщения
-        $model->SMSFeedbackBehavior->textSms = 'тестовое смс сообщение';
-        $model->SMSFeedbackBehavior->phoneSms = '380978800696';
-        //$model->SMSFeedbackBehavior->phoneSms = '380978800696';
-
-        // проверка перед отправкой смс
-        $model->checkParams();
-
-        // отправка смс-сообщения
-        //$model->sendSms();
-
-        //проверка резльутата доставки смс-сообщения
-        if($model->isDeliveredSms()){
-           echo '<h2>сообщение доставлено</h2>';
-        }else{
-            echo '<h2>В процессе отправки смс-сообщения возникли ошибки:'.$model->error_descSms.'</h2>';
-        }
 
         $this->render('personal',array(
             'model'=>$model,

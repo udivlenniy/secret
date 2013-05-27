@@ -5,24 +5,6 @@ class SiteController extends BaseController
 
     public $layout = '//layouts/column2';
 
-//    public function   init()
-//    {
-//        parent::init();
-//    }
-
-//    public function behaviors()
-//    {
-//        return array(
-//            'jsTreeBehavior' => array('class' => 'application.behaviors.JsTreeBehavior',
-//                'modelClassName' => 'Partner',
-//                'form_alias_path' => 'application.views.partner._form',
-//                'view_alias_path' => 'application.views.partner.view',
-//                'label_property' => 'name',
-//                'rel_property' => 'name'
-//            )
-//        );
-//    }
-
 	/**
 	 * Declares class-based actions.
 	 */

@@ -45,34 +45,36 @@ class Jgrowl extends CWidget
     public function init()
     {
 
-        $script = "
+        $script = '
         $(document).ready(function(){
 
-            $.jGrowl('$this->message',{position : '" . $this->position . "'});
+            $.jGrowl(" '.$this->message.' ", {position:" '.$this->position.' "});
 
         })
-        ";
+        ';
+        //,{position : '".$this->position."'
 
-        $js = Yii::app()->assetManager->publish(dirname(__FILE__) . DIRECTORY_SEPARATOR . '/jquery.jgrowl_compressed.js');
+        //$js = Yii::app()->assetManager->publish(dirname(__FILE__) . DIRECTORY_SEPARATOR . '/jquery.jgrowl_compressed.js');
 
-        $cs = Yii::app()->assetManager->publish(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'jquery.jgrowl.css');
+        //$cs = Yii::app()->assetManager->publish(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'jquery.jgrowl.css');
 
-        Yii::app()->clientScript->registerCoreScript('jquery');
 
         // подключаем скрипты всплывающих подсказок
         $this->publishJS();
 
-        Yii::app()->clientScript
-            ->registerScriptFile($js)
-            ->registerCssFile($cs)
-            ->registerScript('jgrowlWidget', $script);
+        Yii::app()->clientScript->registerScript('jgrowlWidget', $script);
+            //->registerScriptFile($js)
+            //->registerCssFile($cs)
+
     }
 
     public function publishJS(){
 
+        Yii::app()->clientScript->registerCoreScript('jquery');
+
         $url = Yii::app()->getAssetManager()->publish( Yii::getPathOfAlias('ext.jgrowl.assets') );
 
-        Yii::app()->clientScript->registerScriptFile($url.'/jquery.jgrowl.js',CClientScript::POS_END);
+        Yii::app()->clientScript->registerScriptFile($url.'/jquery.jgrowl.js',CClientScript::POS_BEGIN);
 
         Yii::app()->clientScript->registerCssFile($url.'/jquery.jgrowl.css');
     }
