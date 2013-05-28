@@ -10,9 +10,7 @@ $this->breadcrumbs=array(
 ?>
 
 <div class="form" id="admin_login">
-
     <h1>Авторизация администратора</h1>
-
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'admin-form',
 	'enableClientValidation'=>true,
@@ -58,12 +56,11 @@ $this->breadcrumbs=array(
         array( // ajaxOptions
             'type' =>'POST',
             'beforeSend' => "function(request){
-            // Set up any pre-sending stuff like initializing progress indicators
             }",
             'success' => "function(data){
                 // handle return data
                 if(data=='ok'){
-                    location.href='';
+                    location.href='/admin/profil/update';
                 }else{
                     $('#admin_login').html(data);
                 }

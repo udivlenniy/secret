@@ -10,7 +10,7 @@ class UserIdentity extends CUserIdentity
     private $_id;
     private $_status;
 
-    public $is_Admin = false;
+    public $is_Admin = true;
 
 	/**
 	 * Authenticates a user.
@@ -52,24 +52,21 @@ class UserIdentity extends CUserIdentity
     {
         $model = new Partner();
 
-        if(Yii::app()->config->get('ADMIN.EMAIL')!=$this->username){
+        if(Yii::app()->config->get('ADMIN.EMAIL')!==$this->username){
             $this->errorCode=self::ERROR_USERNAME_INVALID;
         }elseif(Yii::app()->config->get('ADMIN.PASSWORD')!==$model->encrypting($this->password)){
             $this->errorCode=self::ERROR_PASSWORD_INVALID;
         }else{
-
-            echo 'code_error = none<br>';
-
             $this->errorCode=self::ERROR_NONE;
-            if($this->is_Admin){
-                echo 'is_admin = true<br>';
+            //if($this->is_Admin){
+                //echo 'is_admin = true<br>';
                 $this->_id = 1;
                 $this->setState('role', Partner::ROLE_ADMIN);
                 $this->setState('id', 1);
-            }
+            //}
         }
 
-        echo 'code_resturn='.$this->errorCode;
+        //echo 'code_resturn='.$this->errorCode;
 
         return !$this->errorCode;
     }

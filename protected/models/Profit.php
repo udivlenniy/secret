@@ -73,6 +73,27 @@ class Profit extends CActiveRecord
     }
 
     /*
+     * сумма баллов внесенная участниками система для оплаты партнёрских комплектов
+     */
+    public function inComeProfitAll(){
+
+        $connect = Yii::app()->db;
+
+        $select = 'SELECT SUM(point) AS profit FROM {{finance_partnership}}';
+
+        $query = $connect->createCommand($select);
+
+        $result = $query->queryRow();
+
+        if($result['profit']==null){
+            return 0;
+        }else{
+            return $result['profit'];
+        }
+    }
+
+
+    /*
      * заработок за интервал времени по партнёрской программе
      * в разрезе текущего юзера
      * по выбранному интервалу дат
@@ -81,6 +102,7 @@ class Profit extends CActiveRecord
     public function inComeProfit($dataFrom='', $dataTo='', $sender_account=''){
 
         $connect = Yii::app()->db;
+
 
         $where = ' WHERE destination_account='.Yii::app()->user->id;
 

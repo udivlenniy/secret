@@ -45,38 +45,80 @@
 			),
 		));*/
         if(!Yii::app()->user->isGuest){
-            $this->widget('ext.cssmenu.CssMenu',array(
-                'items'=>array(
-                    //array('label'=>'Home', 'url'=>array('site/index')),
-                    array('label'=>'Мой бизнесс',  'items'=>array(
+            //меню юзера
+            if(Yii::app()->user->role==Partner::ROLE_USER){
+                $this->widget('ext.cssmenu.CssMenu',array(
+                    'items'=>array(
+                        //array('label'=>'Home', 'url'=>array('site/index')),
+                        array('label'=>'Мой бизнесс',  'items'=>array(
                             array('label'=>'Личное развитие', 'url'=>array('/partner/business/personal')),
                             array('label'=>'Развитие бизнесса', 'url'=>array('/partner/business/progress')),
                             array('label'=>'Доход', 'url'=>array('/partner/business/profit')),
                             array('label'=>'Структура пользователя', 'url'=>array('/partner/business/structure')),
                         ),
-                    ),
-                    array(
-                        'label'=>'Мои доходы', 'items'=>array(
+                        ),
+                        array(
+                            'label'=>'Мои доходы', 'items'=>array(
                             array('label'=>'Доходы по Партнерской программе', 'url'=>array('/partner/profit/partner')),
                         )
-                    ),
-                    array(
-                        'label'=>'Мой счет', 'items'=>array(
+                        ),
+                        array(
+                            'label'=>'Мой счет', 'items'=>array(
                             array('label'=>'Пополнение', 'url'=>array('/partner/business/personal')),
                             array('label'=>'Перевод', 'url'=>array('/partner/business/personal')),
                             array('label'=>'Вывод', 'url'=>array('/partner/business/personal')),
                             array('label'=>'История счета', 'url'=>array('/partner/business/personal')),
                         )
-                    ),
-                    array(
-                        'label'=>'Баланс:'.Partner::getBalance(Yii::app()->user->id).'(бал.)', 'visible'=>!Yii::app()->user->isGuest
+                        ),
+                        array(
+                            'label'=>'Баланс:'.Partner::getBalance(Yii::app()->user->id).'(бал.)', 'visible'=>!Yii::app()->user->isGuest
 
-                    ),
-                    array('label'=>'Выйти', 'url'=>array('/site/logout'), 'visible'=>!Yii::app()->user->isGuest)
+                        ),
+                        array('label'=>'Выйти', 'url'=>array('/site/logout'), 'visible'=>!Yii::app()->user->isGuest)
 
-                    //array('label'=>'Login', 'url'=>array('site/login'), 'visible'=>Yii::app()->user->isGuest),
-                )
-            ));
+                        //array('label'=>'Login', 'url'=>array('site/login'), 'visible'=>Yii::app()->user->isGuest),
+                    )
+                ));
+            }
+            //меню админа
+            if(Yii::app()->user->role==Partner::ROLE_ADMIN){
+                $this->widget('ext.cssmenu.CssMenu',array(
+                    'items'=>array(
+
+                            array('label'=>'Редактировать профиль', 'url'=>array('admin/profil/update'), 'visible'=>!Yii::app()->user->isGuest),
+
+                            //array('label'=>'Home', 'url'=>array('site/index')),
+                            array('label'=>'Мой бизнесс',  'items'=>array(
+                                array('label'=>'Развитие бизнесса', 'url'=>array('/admin/business/progress')),
+                                array('label'=>'Доход', 'url'=>array('/admin/business/profit')),
+                                array('label'=>'Структура пользователя', 'url'=>array('/admin/business/structure')),
+                                array('label'=>'Смена спонсора', 'url'=>array('/admin/business/change_sponsor')),
+                            ),
+                        ),
+                        array(
+                            'label'=>'Доход', 'items'=>array(
+                                array('label'=>'Партнерская программа', 'url'=>array('/admin/profit/partner')),
+                            )
+                        ),
+                        array(
+                            'label'=>'Мой счет', 'items'=>array(
+                                array('label'=>'Пополнение', 'url'=>array('/admin/business/personal')),
+                                array('label'=>'Перевод', 'url'=>array('/admin/business/personal')),
+                                array('label'=>'Вывод', 'url'=>array('/admin/business/personal')),
+                                array('label'=>'История счета', 'url'=>array('/admin/business/personal')),
+                           )
+                        ),
+                        array(
+                            'label'=>'Баланс:'.Partner::getBalance(Yii::app()->user->id).'(бал.)', 'visible'=>!Yii::app()->user->isGuest
+
+                        ),
+                        array('label'=>'Выйти', 'url'=>array('/site/logout'), 'visible'=>!Yii::app()->user->isGuest)
+
+
+                    )
+                ));
+            }
+
         }
         ?>
 	</div><!-- mainmenu -->
@@ -91,13 +133,14 @@
 
 	<?php echo $content; ?>
 
-	<div class="clear"></div>
-
-	<div id="footer">
-		Copyright &copy; <?php echo date('Y'); ?> by My Company.<br/>
-		All Rights Reserved.<br/>
-		<?php echo Yii::powered(); ?>
-	</div><!-- footer -->
+<!--	<div class="clear"></div>-->
+<!---->
+<!--	<div id="footer">-->
+<!--		Copyright &copy; --><?php //echo date('Y'); ?><!-- by My Company.<br/>-->
+<!--		All Rights Reserved.<br/>-->
+<!--		--><?php //echo Yii::powered(); ?>
+<!--	</div>-->
+    <!-- footer -->
 
 </div><!-- page -->
 

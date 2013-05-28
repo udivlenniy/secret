@@ -67,8 +67,6 @@ class BuyingPartnershipSet extends CActiveRecord
 	 */
 	public function relations()
 	{
-		// NOTE: you may need to adjust the relation name and the related
-		// class name for the relations automatically generated below.
 		return array(
 			'partner' => array(self::BELONGS_TO, 'Partner', 'partner_id'),
 			'partnershipSet' => array(self::BELONGS_TO, 'PartnershipSet', 'partnership_set_id'),
@@ -113,4 +111,16 @@ class BuyingPartnershipSet extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
+
+    /*
+     * кол-во проданных партнёрских комплектов за весь период времени
+     */
+    public static function numberSales(){
+
+        $sql = 'SELECT COUNT(id) AS count FROM {{buying_partnership_set}}';
+
+        $result = Yii::app()->db->createCommand($sql)->query();
+
+        return $result['count'];
+    }
 }

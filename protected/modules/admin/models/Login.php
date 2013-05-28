@@ -80,22 +80,34 @@ class Login extends CFormModel{
      */
     public function login()
     {
-        echo 'login<br>';
+        //echo 'login<br>';
 
-        if($this->_identity===null)
-        {
+        //if($this->_identity===null)
+        //{
             $this->_identity=new UserIdentity($this->username,$this->password);
             $this->_identity->is_Admin = true;
             $this->_identity->authenticateAdmin();
-        }
+        //}
         if($this->_identity->errorCode===UserIdentity::ERROR_NONE)
         {
             //$duration=$this->rememberMe ? 3600*24*30 : 0; // 30 days
             $duration = 0;
             Yii::app()->user->login($this->_identity,$duration);
             return true;
-        }
-        else
+        }else{
+
+            //echo 'error_code_login:'.$this->_identity->errorCode.'<br>';
+
             return false;
+        }
+    }
+
+
+    // описываем событие onAdminAuth
+    public function onAdminAuth($event) {
+        // Непосредственно вызывать событие принято в его описании.
+        // Это позволяет использовать данный метод вместо raiseEvent
+        // во всём остальном коде.
+        $this->raiseEvent('onAdminAuth', $event);
     }
 }

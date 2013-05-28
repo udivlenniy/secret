@@ -9,6 +9,8 @@
 // контроллер доступа для админа, разрешён доступ только у админа
 class BaseAdminController extends BaseController{
 
+    public $layout = '//layouts/column2';
+
     /**
      * @return array action filters
      */
